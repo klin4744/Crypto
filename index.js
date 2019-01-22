@@ -16,14 +16,28 @@ app.post("/", function(req, res) {
   // console.log(req.body.crypto);
   let crypto = req.body.crypto;
   let fiat = req.body.fiat;
-  request(
-    `https://apiv2.bitcoinaverage.com/indices/global/ticker/${crypto + fiat}`,
-    function(error, response, body) {
-      let info = JSON.parse(body);
-      res.send(`<p>The price of ${crypto} is ${info.last + " " + fiat}</p>`);
-      console.log(info.last);
+  let amount = req.body.amount;
+  let url = `https://apiv2.bitcoinaverage.com/convert/global`;
+  // `https://apiv2.bitcoinaverage.com/indices/global/ticker/${crypto + fiat}`
+  let options = {
+    url,
+    method: "GET",
+    qs: {
+      from: crypto,
+      to: fiat,
+      amount
     }
-  );
+  };
+  request(options, function(error, response, body) {
+    let info = JSON.parse(body);
+    res.write(`<p>The current date is ${info.time}</p>`);
+    res.write(
+      `<h3>The price of ${amount + " " + crypto} is ${info.price +
+        " " +
+        fiat}</h3>`
+    );
+    res.send();
+  });
 });
 
 // Start Server
